@@ -1,3 +1,3 @@
 return {
-	default_keymaps = true,
+  default_keymaps = true,
 }
