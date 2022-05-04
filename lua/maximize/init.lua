@@ -3,12 +3,12 @@ local M = {}
 M.setup = function(user_config)
   -- Check if user is on Windows.
   if vim.fn.has("win32") == 1 then
-    require("windex.utils").error_msg("A unix system is required for windex. Have you tried using WSL?")
+    require("maximize.utils").error_msg("A unix system is required for maximize. Have you tried using WSL?")
     return
   end
 
-  local utils = require("windex.utils")
-  local config = require("windex.config")
+  local utils = require("maximize.utils")
+  local config = require("maximize.config")
 
   -- Setting the config options.
   if user_config ~= nil then
@@ -24,12 +24,12 @@ M.setup = function(user_config)
     -- Delete session file from cache.
     autocmd({ "VimEnter", "VimLeave" }, {
       command = "call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')",
-      group = augroup("windex_maximize", {}),
+      group = augroup("maximize_maximize", {}),
     })
   else
     -- Delete session file from cache.
     vim.cmd([[
-    aug windex_maximize
+    aug maximize_maximize
     au!
     au VimEnter * call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')
     au VimLeave * call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')
@@ -43,7 +43,7 @@ M.setup = function(user_config)
     local keymap = vim.api.nvim_set_keymap
     local opts = { noremap = true }
 
-    keymap("n", "<Leader>z", "<Cmd>lua require('windex').toggle_maximize()<CR>", opts)
+    keymap("n", "<Leader>z", "<Cmd>lua require('maximize').toggle_maximize()<CR>", opts)
   end
 end
 
@@ -51,13 +51,13 @@ end
 
 -- Maximize:
 M.toggle_maximize = function()
-  require("windex.maximize").toggle()
+  require("maximize.maximize").toggle()
 end
 M.maximize_windows = function()
-  require("windex.maximize").maximize()
+  require("maximize.maximize").maximize()
 end
 M.restore_windows = function()
-  require("windex.maximize").restore()
+  require("maximize.maximize").restore()
 end
 
 return M
