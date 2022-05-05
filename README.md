@@ -38,19 +38,19 @@ default_keymaps = true -- Enable default keymaps.
 ### Default Keymaps
 
 ```lua
-vim.keymap.set('n', '<Leader>z', "<Cmd>lua require('windex').toggle()<CR>")
+vim.keymap.set('n', '<Leader>z', "<Cmd>lua require('maximize').toggle()<CR>")
 ```
 
 ## ℹ️ API
 
 * Toggle maximizing the current window:
 
-  `require('windex').toggle()`
+  `require('maximize').toggle()`
 
 * Maximize the current window:
 
-  `require('windex').maximize()`
+  `require('maximize').maximize()`
 
 * Restore windows:
 
-  `require('windex').restore()`
+  `require('maximize').restore()`
