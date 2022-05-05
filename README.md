@@ -29,7 +29,7 @@ A settings table can be passed into the setup function for custom options.
 ### Default Settings
 
 ```lua
-default_keymaps = true, -- Enable default keymaps.
+default_keymaps = true -- Enable default keymaps.
 ```
 
 ## ⌨️  Keymaps
