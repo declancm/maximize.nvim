@@ -24,12 +24,12 @@ M.setup = function(user_config)
     -- Delete session file from cache.
     autocmd({ "VimEnter", "VimLeave" }, {
       command = "call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')",
-      group = augroup("maximize_maximize", {}),
+      group = augroup("clear_maximize_cache", {}),
     })
   else
     -- Delete session file from cache.
     vim.cmd([[
-    aug maximize_maximize
+    aug clear_maximize_cache
     au!
     au VimEnter * call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')
     au VimLeave * call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')
@@ -43,20 +43,20 @@ M.setup = function(user_config)
     local keymap = vim.api.nvim_set_keymap
     local opts = { noremap = true }
 
-    keymap("n", "<Leader>z", "<Cmd>lua require('maximize').toggle_maximize()<CR>", opts)
+    keymap("n", "<Leader>z", "<Cmd>lua require('maximize').toggle()<CR>", opts)
   end
 end
 
 -- API:
 
 -- Maximize:
-M.toggle_maximize = function()
+M.toggle = function()
   require("maximize.maximize").toggle()
 end
-M.maximize_windows = function()
+M.maximize = function()
   require("maximize.maximize").maximize()
 end
-M.restore_windows = function()
+M.restore = function()
   require("maximize.maximize").restore()
 end
 

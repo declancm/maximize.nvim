@@ -7,7 +7,6 @@ local saved = {}
 
 -- Toggle maximizing the current nvim window and tmux pane.
 M.toggle = function()
-  -- if not vim.w.__windex_maximized then
   if maximized then
     M.restore()
   else
@@ -50,7 +49,6 @@ M.maximize = function()
     vim.cmd("only")
   end
 
-  -- vim.w.__windex_maximized = true
   maximized = true
 end
 
@@ -79,7 +77,6 @@ M.restore = function()
     vim.opt[option] = value
   end
 
-  -- vim.w.__windex_maximized = false
   maximized = false
 end
 
