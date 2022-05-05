@@ -5,7 +5,6 @@ local utils = require("maximize.utils")
 local maximized = false
 local saved = {}
 
--- Toggle maximizing the current nvim window and tmux pane.
 M.toggle = function()
   if maximized then
     M.restore()
@@ -14,8 +13,12 @@ M.toggle = function()
   end
 end
 
--- Maximize the current nvim window and tmux pane.
 M.maximize = function()
+  -- Return if only one window exists.
+  if vim.fn.winnr("$") == 1 then
+    return
+  end
+
   -- Save options.
   saved = {}
   saved.cmdheight = vim.opt.cmdheight
@@ -38,23 +41,20 @@ M.maximize = function()
     end
   end
 
-  -- Maximize nvim window.
-  if vim.fn.winnr("$") ~= 1 then
-    -- Save the session.
-    local saved_sessionoptions = vim.opt.sessionoptions:get()
-    vim.opt.sessionoptions = { "blank", "buffers", "curdir", "folds", "help", "tabpages", "winsize" }
-    vim.cmd("mksession! ~/.cache/nvim/.maximize_session.vim")
-    vim.opt.sessionoptions = saved_sessionoptions
+  -- Save the session.
+  local saved_sessionoptions = vim.opt.sessionoptions:get()
+  vim.opt.sessionoptions = { "blank", "buffers", "curdir", "folds", "help", "tabpages", "winsize" }
+  vim.cmd("mksession! ~/.cache/nvim/.maximize_session.vim")
+  vim.opt.sessionoptions = saved_sessionoptions
 
-    vim.cmd("only")
-  end
+  -- Maximize the window.
+  vim.cmd("only")
 
   maximized = true
 end
 
--- Restore the nvim windows and tmux panes.
 M.restore = function()
-  -- Restore nvim windows.
+  -- Restore windows.
   if vim.fn.filereadable(vim.fn.getenv("HOME") .. "/.cache/nvim/.maximize_session.vim") == 1 then
     vim.cmd("wall")
     local file_name = vim.fn.getreg("%")

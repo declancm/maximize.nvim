@@ -6,15 +6,6 @@ utils.error_msg = function(message, code, level)
   vim.notify(string.format("%s: %s", code, message), vim.log.levels[level])
 end
 
-utils.contains = function(table, target)
-  for _, item in pairs(table) do
-    if item == target then
-      return true
-    end
-  end
-  return false
-end
-
 utils.merge = function(t1, t2)
   for k, v in pairs(t2) do
     if (type(v) == "table") and (type(t1[k] or false) == "table") then
