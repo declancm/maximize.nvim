@@ -1,14 +1,14 @@
 local utils = {}
 
 utils.error_msg = function(message, code, level)
-  code = code or "Error"
-  level = level or "ERROR"
-  vim.notify(string.format("%s: %s", code, message), vim.log.levels[level])
+  code = code or 'Error'
+  level = level or 'ERROR'
+  vim.notify(string.format('%s: %s', code, message), vim.log.levels[level])
 end
 
 utils.merge = function(t1, t2)
   for k, v in pairs(t2) do
-    if (type(v) == "table") and (type(t1[k] or false) == "table") then
+    if (type(v) == 'table') and (type(t1[k] or false) == 'table') then
       if utils.is_array(t1[k]) then
         t1[k] = utils.concat(t1[k], v)
       else
