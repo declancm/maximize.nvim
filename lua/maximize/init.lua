@@ -16,23 +16,21 @@ M.setup = function(user_config)
   end
 
   -- AUTOCMDS:
+  -- Clean cache upon exiting vim (delete the temporary session file for each
+  -- tabpage)
 
   if vim.fn.has('nvim-0.7.0') == 1 then
     local autocmd = vim.api.nvim_create_autocmd
     local augroup = vim.api.nvim_create_augroup
-
-    -- Delete session file from cache.
-    autocmd({ 'VimEnter', 'VimLeave' }, {
-      command = "call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')",
+    autocmd({ 'VimLeave' }, {
       group = augroup('clear_maximize_cache', {}),
+      callback = require('maximize.utils').delete_session_files
     })
   else
-    -- Delete session file from cache.
     vim.cmd([[
     aug clear_maximize_cache
     au!
-    au VimEnter * call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')
-    au VimLeave * call delete(getenv('HOME') . '/.cache/nvim/.maximize_session.vim')
+    au VimLeave * lua require('maximize.utils').delete_session_files()
     aug END
     ]])
   end

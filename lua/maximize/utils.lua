@@ -39,4 +39,11 @@ utils.is_array = function(t)
   return true
 end
 
+utils.delete_session_files = function()
+  local tabpages = vim.api.nvim_list_tabpages()
+  for _, tabpage_num in ipairs(tabpages) do
+    vim.fn.delete(vim.fn.expand(vim.t[tonumber(tabpage_num)].tmp_session_file))
+  end
+end
+
 return utils
