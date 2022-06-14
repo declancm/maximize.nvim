@@ -41,6 +41,41 @@ default_keymaps = true -- Enable default keymaps.
 vim.keymap.set('n', '<Leader>z', "<Cmd>lua require('maximize').toggle()<CR>")
 ```
 
+## 🚥 statusline & winbar
+
+Use the tabpage-scoped variable `vim.t.maximized` to check whether the current window
+is maximized or not.
+
+### Lualine
+
+```lua
+local function maximize_status()
+  return vim.t.maximized and '   ' or ''
+end
+
+require('lualine').setup {
+  sections = {
+    lualine_c = { maximize_status }
+  }
+}
+```
+
+### winbar
+
+```lua
+-- ~/.config/nvim/lua/winbar.lua
+local M = {}
+
+M.maximize_status = function()
+  return vim.t.maximized and '   ' or ''
+end
+
+return M
+
+-- ~/.config/nvim/init.lua
+vim.o.winbar = "%{%v:lua.require('winbar').maximize_status()%}"
+```
+
 ## ℹ️ API
 
 * Toggle maximizing the current window:
