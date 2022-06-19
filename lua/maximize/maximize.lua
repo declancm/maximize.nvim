@@ -20,8 +20,8 @@ M.maximize = function()
   vim.t.tmp_session_file = '~/.cache/nvim/.maximize_session-' .. os.time() .. '.vim'
 
   -- Save options.
-  vim.t.saved_cmdheight = vim.opt.cmdheight:get()
-  vim.t.saved_cmdwinheight = vim.opt.cmdwinheight:get()
+  vim.t.saved_cmdheight = vim.opt_local.cmdheight:get()
+  vim.t.saved_cmdwinheight = vim.opt_local.cmdwinheight:get()
 
   -- Handle floating windows
   -- TODO: after the next Neovim release, we don't need to handle float wins
@@ -45,10 +45,10 @@ M.maximize = function()
   end
 
   -- Save the session.
-  local saved_sessionoptions = vim.opt.sessionoptions:get()
-  vim.opt.sessionoptions = { 'blank', 'buffers', 'curdir', 'folds', 'help', 'winsize' }
+  local saved_sessionoptions = vim.opt_local.sessionoptions:get()
+  vim.opt_local.sessionoptions = { 'blank', 'buffers', 'curdir', 'folds', 'help', 'winsize' }
   vim.cmd('mksession! ' .. vim.t.tmp_session_file)
-  vim.opt.sessionoptions = saved_sessionoptions
+  vim.opt_local.sessionoptions = saved_sessionoptions
 
   -- Maximize the window.
   vim.cmd('only')
@@ -57,12 +57,12 @@ M.maximize = function()
 end
 
 M.restore = function()
-  -- Avoid [No Name] buffer if set hidden (E.g., when maximizing the help window
-  -- and then restore)
-  vim.bo.bufhidden = 'wipe'
-
   -- Restore windows.
   if vim.fn.filereadable(vim.fn.expand(vim.t.tmp_session_file)) == 1 then
+    -- Avoid [No Name] buffer if set hidden (E.g., when maximizing the help window
+    -- and then restore)
+    vim.bo.bufhidden = 'wipe'
+
     vim.cmd('silent wall')
     local file_name = vim.fn.getreg('%')
     local saved_position = vim.fn.getcurpos()
@@ -77,11 +77,11 @@ M.restore = function()
       vim.cmd('edit ' .. file_name)
     end
     vim.fn.setpos('.', saved_position)
-  end
 
-  -- Restore saved options.
-  vim.opt.cmdheight = vim.t.saved_cmdheight
-  vim.opt.cmdwinheight = vim.t.saved_cmdwinheight
+    -- Restore saved options.
+    vim.opt_local.cmdheight = vim.t.saved_cmdheight
+    vim.opt_local.cmdwinheight = vim.t.saved_cmdwinheight
+  end
 
   vim.t.maximized = false
 end

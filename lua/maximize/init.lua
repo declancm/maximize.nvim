@@ -23,8 +23,8 @@ M.setup = function(user_config)
     local autocmd = vim.api.nvim_create_autocmd
     local augroup = vim.api.nvim_create_augroup
     autocmd({ 'VimLeave' }, {
+      callback = require('maximize.utils').delete_session_files,
       group = augroup('clear_maximize_cache', {}),
-      callback = require('maximize.utils').delete_session_files
     })
   else
     vim.cmd([[
