@@ -64,7 +64,7 @@ M.restore = function()
     vim.bo.bufhidden = 'wipe'
 
     vim.cmd('silent wall')
-    local file_name = vim.fn.getreg('%')
+    local file_name = vim.fn.expand('%:p')
     local saved_position = vim.fn.getcurpos()
 
     -- Source the saved session.
@@ -73,7 +73,7 @@ M.restore = function()
     -- Delete the saved session.
     vim.fn.delete(vim.fn.expand(vim.t.tmp_session_file))
 
-    if vim.fn.getreg('%') ~= file_name then
+    if vim.fn.expand('%:p') ~= file_name then
       vim.cmd('edit ' .. file_name)
     end
     vim.fn.setpos('.', saved_position)
