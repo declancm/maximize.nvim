@@ -23,6 +23,14 @@ M.maximize = function()
   vim.t.saved_cmdheight = vim.opt_local.cmdheight:get()
   vim.t.saved_cmdwinheight = vim.opt_local.cmdwinheight:get()
 
+  -- https://github.com/Shatur/neovim-session-manager/blob/9652b392805dfd497877342e54c5a71be7907daf/lua/session_manager/utils.lua#L74-L79
+  -- Remove all non-file and utility buffers because they cannot be saved
+  for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buffer) and not utils.is_restorable(buffer) then
+      vim.api.nvim_buf_delete(buffer, { force = true })
+    end
+  end
+
   -- Handle floating windows
   -- TODO: after the next Neovim release, we don't need to handle float wins
   -- (https://github.com/neovim/neovim/commit/3fe6bf3a1e50299dbdd6314afbb18e468eb7ce08)
