@@ -54,7 +54,22 @@ M.maximize = function()
 
   -- Save the session.
   local saved_sessionoptions = vim.opt_local.sessionoptions:get()
-  vim.opt_local.sessionoptions = { 'blank', 'buffers', 'curdir', 'folds', 'help', 'winsize' }
+  -- vim.opt_local.sessionoptions = { 'blank', 'buffers', 'curdir', 'folds', 'help', 'winsize' }
+  vim.opt_local.sessionoptions = {
+      'blank',
+      'buffers',
+      'curdir',
+      'folds',
+      -- 'globals',
+      'help',
+      -- 'localoptions',
+      -- 'options',
+      'resize',
+      'tabpages',
+      'terminal',
+      'winpos',
+      'winsize',
+    }
   vim.cmd('mksession! ' .. vim.t.tmp_session_file)
   vim.opt_local.sessionoptions = saved_sessionoptions
 
@@ -67,10 +82,6 @@ end
 M.restore = function()
   -- Restore windows.
   if vim.fn.filereadable(vim.fn.expand(vim.t.tmp_session_file)) == 1 then
-    -- Avoid [No Name] buffer if set hidden (E.g., when maximizing the help window
-    -- and then restore)
-    vim.bo.bufhidden = 'wipe'
-
     vim.cmd('silent wall')
     local file_name = vim.fn.expand('%:p')
     local saved_position = vim.fn.getcurpos()
