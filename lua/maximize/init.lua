@@ -1,12 +1,6 @@
 local M = {}
 
 M.setup = function(user_config)
-  -- Check if user is on Windows.
-  if vim.fn.has('win32') == 1 then
-    require('maximize.utils').error_msg('A unix system is required for maximize. Have you tried using WSL?')
-    return
-  end
-
   local utils = require('maximize.utils')
   local config = require('maximize.config')
 
