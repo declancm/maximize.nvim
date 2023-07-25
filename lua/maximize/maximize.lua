@@ -16,8 +16,10 @@ M.maximize = function()
     return
   end
 
+  local sessions_home = utils.get_home_directory() .. utils.os_separator .. '.cache' .. utils.os_separator .. 'nvim'
+
   -- A temporary file for storing the current session. It's unique and per tab.
-  vim.t.tmp_session_file = '~/.cache/nvim/.maximize_session-' .. os.time() .. '.vim'
+  vim.t.tmp_session_file = sessions_home .. utils.os_separator .. '.maximize_session-' .. os.time() .. '.vim'
 
   -- Save options.
   vim.t.saved_cmdheight = vim.opt_local.cmdheight:get()
@@ -70,6 +72,9 @@ M.maximize = function()
       'winpos',
       'winsize',
     }
+
+  utils.create_dir_if_not_exists(sessions_home)
+
   vim.cmd('mksession! ' .. vim.t.tmp_session_file)
   vim.opt_local.sessionoptions = saved_sessionoptions
 

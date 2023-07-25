@@ -1,9 +1,51 @@
 local utils = {}
 
+utils.os_separator = package.config:sub(1, 1)
+
 utils.error_msg = function(message, code, level)
   code = code or 'Error'
   level = level or 'ERROR'
   vim.notify(string.format('%s: %s', code, message), vim.log.levels[level])
+end
+
+utils.get_home_directory = function()
+  local home_dir = os.getenv('HOME')
+
+  if home_dir == nil or home_dir == '' then
+    home_dir = os.getenv('userprofile')
+  end
+
+  return home_dir
+end
+
+local function directory_exists(sPath)
+  if type(sPath) ~= 'string' then
+    return false
+  end
+
+  local response = os.execute('cd ' .. sPath)
+  if response == 0 then
+    return true
+  end
+  return false
+end
+
+utils.create_dir_if_not_exists = function(dirpath)
+  if vim.fn.has('win32') == 1 then
+    local path = ''
+    for folder in dirpath:gmatch('[^\\]+') do
+      if path:len() == 0 then
+        path = folder
+      else
+        path = path .. '\\' .. folder
+        if not directory_exists(path) then
+          os.execute('mkdir ' .. path)
+        end
+      end
+    end
+  else
+    os.execute('mkdir -p ' .. dirpath)
+  end
 end
 
 utils.merge = function(t1, t2)
