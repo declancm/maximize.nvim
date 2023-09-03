@@ -1,5 +1,6 @@
 local M = {}
 
+local integrations = require('maximize.integrations')
 local utils = require('maximize.utils')
 
 M.toggle = function()
@@ -11,6 +12,11 @@ M.toggle = function()
 end
 
 M.maximize = function()
+  vim.t.maximized = true
+
+  -- Clear the plugin windows.
+  integrations.clear()
+
   -- Return if only one window exists.
   if vim.fn.winnr('$') == 1 then
     return
@@ -75,11 +81,11 @@ M.maximize = function()
 
   -- Maximize the window.
   vim.cmd('only')
-
-  vim.t.maximized = true
 end
 
 M.restore = function()
+  vim.t.maximized = false
+
   -- Restore windows.
   if vim.fn.filereadable(vim.fn.expand(vim.t.tmp_session_file)) == 1 then
     vim.cmd('silent wall')
@@ -102,7 +108,8 @@ M.restore = function()
     vim.opt_local.cmdwinheight = vim.t.saved_cmdwinheight
   end
 
-  vim.t.maximized = false
+  -- Restore plugin windows.
+  integrations.restore()
 end
 
 return M
