@@ -25,21 +25,10 @@ M.setup = function(user_config)
   -- Clean cache upon exiting vim (delete the temporary session file for each
   -- tabpage)
 
-  if vim.fn.has('nvim-0.7.0') == 1 then
-    local autocmd = vim.api.nvim_create_autocmd
-    local augroup = vim.api.nvim_create_augroup
-    autocmd({ 'VimLeave' }, {
-      callback = require('maximize.utils').delete_session_files,
-      group = augroup('clear_maximize_cache', {}),
-    })
-  else
-    vim.cmd([[
-    aug clear_maximize_cache
-    au!
-    au VimLeave * lua require('maximize.utils').delete_session_files()
-    aug END
-    ]])
-  end
+  vim.api.nvim_create_autocmd({ 'VimLeave' }, {
+    callback = require('maximize.utils').delete_session_files,
+    group = vim.api.nvim_create_augroup('clear_maximize_cache', {}),
+  })
 
   -- KEYMAPS:
 
