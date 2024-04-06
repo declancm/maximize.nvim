@@ -7,6 +7,12 @@ M.setup = function(user_config)
     return
   end
 
+  -- Check if the user has Neovim v0.8.0.
+  if vim.fn.has('nvim-0.8.0') == 0 then
+    require('maximize.utils').error_msg('Neovim >= 0.8.0 is required. Use an older version tag for older Neovim versions.')
+    return
+  end
+
   local utils = require('maximize.utils')
   local config = require('maximize.config')
 
