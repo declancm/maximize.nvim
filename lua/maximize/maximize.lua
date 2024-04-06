@@ -31,27 +31,6 @@ M.maximize = function()
     end
   end
 
-  -- Handle floating windows
-  -- TODO: after the next Neovim release, we don't need to handle float wins
-  -- (https://github.com/neovim/neovim/commit/3fe6bf3a1e50299dbdd6314afbb18e468eb7ce08)
-
-  -- Close floating windows because they break session files.
-  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    local config = vim.api.nvim_win_get_config(win)
-    if config.relative ~= '' then
-      vim.api.nvim_win_close(win, false)
-    end
-  end
-
-  -- If a floating window still exists, it contains unsaved changes so return.
-  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    local config = vim.api.nvim_win_get_config(win)
-    if config.relative ~= '' then
-      utils.error_msg('Cannot maximize. A floating window with unsaved changes exists')
-      return
-    end
-  end
-
   -- Save the session.
   local saved_sessionoptions = vim.opt_local.sessionoptions:get()
   -- vim.opt_local.sessionoptions = { 'blank', 'buffers', 'curdir', 'folds', 'help', 'winsize' }

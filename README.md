@@ -9,6 +9,10 @@ Maximize neovim windows.
 * Works with plugins such as 'nvim-scrollview', which have floating windows
   (unlike other maximizing plugins).
 
+## 🛠️ Requirements
+
+* Neovim >= 0.8.0 (use a tagged version for older Neovim versions)
+
 ## 📦 Installation
 
 Install with your favourite plugin manager and run the setup function.
@@ -22,7 +26,7 @@ use {
 }
 ```
 
-## ⚙️ Configuration
+## ⚙️  Configuration
 
 A settings table can be passed into the setup function for custom options.
 
