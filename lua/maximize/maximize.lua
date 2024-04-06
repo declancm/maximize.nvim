@@ -32,23 +32,20 @@ M.maximize = function()
   end
 
   -- Save the session.
+  -- NOTE: Options aren't saving since we aren't closing Neovim.
   local saved_sessionoptions = vim.opt_local.sessionoptions:get()
-  -- vim.opt_local.sessionoptions = { 'blank', 'buffers', 'curdir', 'folds', 'help', 'winsize' }
   vim.opt_local.sessionoptions = {
-      'blank',
-      'buffers',
-      'curdir',
-      'folds',
-      -- 'globals',
-      'help',
-      -- 'localoptions',
-      -- 'options',
-      'resize',
-      'tabpages',
-      'terminal',
-      'winpos',
-      'winsize',
-    }
+    'blank',
+    'buffers',
+    'curdir',
+    'folds',
+    'help',
+    'resize',
+    'tabpages',
+    'terminal',
+    'winpos',
+    'winsize',
+  }
   vim.cmd('mksession! ' .. vim.t.tmp_session_file)
   vim.opt_local.sessionoptions = saved_sessionoptions
 
