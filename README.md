@@ -42,7 +42,7 @@ default_keymaps = true -- Enable default keymaps.
 ### Default Keymaps
 
 ```lua
-vim.keymap.set('n', '<Leader>z', "<Cmd>lua require('maximize').toggle()<CR>")
+vim.keymap.set('n', '<Leader>z', require('maximize').toggle)
 ```
 
 ## 🚥 statusline & winbar

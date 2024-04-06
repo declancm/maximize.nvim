@@ -1,56 +1,111 @@
 local M = {}
 
-M.setup = function(user_config)
-  -- Check if user is on Windows.
-  if vim.fn.has('win32') == 1 then
-    require('maximize.utils').error_msg('A unix system is required for maximize. Have you tried using WSL?')
-    return
-  end
+local utils = require('maximize.utils')
 
+M.setup = function(user_config)
   -- Check if the user has Neovim v0.8.0.
   if vim.fn.has('nvim-0.8.0') == 0 then
-    require('maximize.utils').error_msg('Neovim >= 0.8.0 is required. Use an older version tag for older Neovim versions.')
+    require('maximize.utils').error_msg(
+    'Neovim >= 0.8.0 is required for maximize. Use an older version tag for older Neovim versions.')
     return
   end
 
-  local utils = require('maximize.utils')
   local config = require('maximize.config')
 
   -- Setting the config options.
-  if user_config ~= nil then
+  if user_config then
     utils.merge(config, user_config)
   end
 
-  -- AUTOCMDS:
-  -- Clean cache upon exiting vim (delete the temporary session file for each
-  -- tabpage)
-
-  vim.api.nvim_create_autocmd({ 'VimLeave' }, {
-    callback = require('maximize.utils').delete_session_files,
-    group = vim.api.nvim_create_augroup('clear_maximize_cache', {}),
-  })
-
-  -- KEYMAPS:
-
+  -- Set keymaps.
   if config.default_keymaps then
-    local keymap = vim.api.nvim_set_keymap
-    local opts = { noremap = true }
-
-    keymap('n', '<Leader>z', "<Cmd>lua require('maximize').toggle()<CR>", opts)
+    vim.keymap.set('n', '<Leader>z', require('maximize').toggle)
   end
 end
 
--- API:
-
--- Maximize:
 M.toggle = function()
-  return require('maximize.maximize').toggle()
+  if vim.t.maximized then
+    M.restore()
+  else
+    M.maximize()
+  end
 end
+
 M.maximize = function()
-  return require('maximize.maximize').maximize()
+  -- Return if only one window exists.
+  if vim.fn.winnr('$') == 1 then
+    return
+  end
+
+  -- Save options.
+  vim.t.saved_cmdheight = vim.opt_local.cmdheight:get()
+  vim.t.saved_cmdwinheight = vim.opt_local.cmdwinheight:get()
+
+  -- https://github.com/Shatur/neovim-session-manager/blob/9652b392805dfd497877342e54c5a71be7907daf/lua/session_manager/utils.lua#L74-L79
+  -- Remove all non-file and utility buffers because they cannot be saved
+  for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_valid(buffer) and not utils.is_restorable(buffer) then
+      vim.api.nvim_buf_delete(buffer, { force = true })
+    end
+  end
+
+  -- Save the existing session options and then set them.
+  -- NOTE: Options aren't saved since we aren't closing Neovim.
+  local saved_sessionoptions = vim.opt_local.sessionoptions:get()
+  vim.opt_local.sessionoptions = {
+    'blank',
+    'buffers',
+    'curdir',
+    'folds',
+    'help',
+    'resize',
+    'tabpages',
+    'terminal',
+    'winpos',
+    'winsize',
+  }
+
+  -- Write the session to a temporary file.
+  local tmp_file_name = os.tmpname()
+  vim.cmd('mksession! ' .. tmp_file_name)
+
+  -- Read the session to a tabpage-scoped variable and delete the temporary file.
+  local tmp_file = assert(io.open(tmp_file_name, 'rb'))
+  vim.t.saved_session = tmp_file:read('*all')
+  tmp_file:close()
+  os.remove(tmp_file_name)
+
+  -- Restore the saved session options.
+  vim.opt_local.sessionoptions = saved_sessionoptions
+
+  -- Maximize the window.
+  vim.cmd('only')
+
+  vim.t.maximized = true
 end
+
 M.restore = function()
-  return require('maximize.maximize').restore()
+  -- Restore windows.
+  if vim.t.saved_session then
+    vim.cmd('silent wall')
+    local file_name = vim.fn.expand('%:p')
+    local saved_position = vim.fn.getcurpos()
+
+    -- Source the saved session.
+    vim.api.nvim_exec(vim.t.saved_session, false)
+    vim.t.saved_session = nil
+
+    if vim.fn.expand('%:p') ~= file_name then
+      vim.cmd('edit ' .. file_name)
+    end
+    vim.fn.setpos('.', saved_position)
+
+    -- Restore saved options.
+    vim.opt_local.cmdheight = vim.t.saved_cmdheight
+    vim.opt_local.cmdwinheight = vim.t.saved_cmdwinheight
+  end
+
+  vim.t.maximized = false
 end
 
 return M

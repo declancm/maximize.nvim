@@ -39,13 +39,6 @@ utils.is_array = function(t)
   return true
 end
 
-utils.delete_session_files = function()
-  local tabpages = vim.api.nvim_list_tabpages()
-  for _, tabpage_num in ipairs(tabpages) do
-    vim.fn.delete(vim.fn.expand(vim.t[tonumber(tabpage_num)].tmp_session_file))
-  end
-end
-
 -- https://github.com/Shatur/neovim-session-manager/blob/9652b392805dfd497877342e54c5a71be7907daf/lua/session_manager/utils.lua#L129-L149
 utils.is_restorable = function(buffer)
   if #vim.api.nvim_buf_get_option(buffer, 'bufhidden') ~= 0 then
