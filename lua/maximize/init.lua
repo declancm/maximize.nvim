@@ -37,6 +37,8 @@ M.maximize = function()
     return
   end
 
+  vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
+
   -- Save options.
   vim.t.saved_cmdheight = vim.opt_local.cmdheight:get()
   vim.t.saved_cmdwinheight = vim.opt_local.cmdwinheight:get()
@@ -103,6 +105,8 @@ M.restore = function()
     -- Restore saved options.
     vim.opt_local.cmdheight = vim.t.saved_cmdheight
     vim.opt_local.cmdwinheight = vim.t.saved_cmdwinheight
+
+    vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
   end
 
   vim.t.maximized = false
