@@ -45,6 +45,13 @@ default_keymaps = true -- Enable default keymaps.
 vim.keymap.set('n', '<Leader>z', require('maximize').toggle)
 ```
 
+## 📅 User Events
+
+The following user events are triggered for easier plugin integration:
+
+* **WindowMaximizeStart**: before maximizing
+* **WindowRestoreEnd**: after restoring
+
 ## 🚥 statusline & winbar
 
 Use the tabpage-scoped variable `vim.t.maximized` to check whether the current window
