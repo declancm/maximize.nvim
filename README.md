@@ -50,6 +50,7 @@ vim.keymap.set('n', '<Leader>z', require('maximize').toggle)
 Integration exists for the following plugins:
 
 * aerial.nvim
+* nvim-dap-ui
 * nvim-tree.lua
 
 ## 📅 User Events

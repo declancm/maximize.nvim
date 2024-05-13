@@ -3,6 +3,7 @@ local M = {
 }
 local plugins = {
   require('maximize.integrations.aerial'),
+  require('maximize.integrations.dapui'),
   require('maximize.integrations.tree'),
 }
 
