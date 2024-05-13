@@ -110,11 +110,11 @@ M.restore = function()
     vim.opt_local.cmdheight = vim.t.saved_cmdheight
     vim.opt_local.cmdwinheight = vim.t.saved_cmdwinheight
 
+    -- Restore plugin windows.
+    integrations.restore()
+
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
   end
-
-  -- Restore plugin windows.
-  integrations.restore()
 end
 
 return M
