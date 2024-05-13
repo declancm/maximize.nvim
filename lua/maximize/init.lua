@@ -1,5 +1,6 @@
 local M = {}
 
+local integrations = require('maximize.integrations')
 local utils = require('maximize.utils')
 
 M.setup = function(user_config)
@@ -32,10 +33,15 @@ M.toggle = function()
 end
 
 M.maximize = function()
+  vim.t.maximized = true
+
   -- Return if only one window exists.
   if vim.fn.winnr('$') == 1 then
     return
   end
+
+  -- Clear the plugin windows.
+  integrations.clear()
 
   vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
 
@@ -82,11 +88,11 @@ M.maximize = function()
 
   -- Maximize the window.
   vim.cmd('only')
-
-  vim.t.maximized = true
 end
 
 M.restore = function()
+  vim.t.maximized = false
+
   -- Restore windows.
   if vim.t.saved_session then
     vim.cmd('silent wall')
@@ -109,7 +115,8 @@ M.restore = function()
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
   end
 
-  vim.t.maximized = false
+  -- Restore plugin windows.
+  integrations.restore()
 end
 
 return M
