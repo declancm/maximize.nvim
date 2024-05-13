@@ -45,7 +45,7 @@ default_keymaps = true -- Enable default keymaps.
 vim.keymap.set('n', '<Leader>z', require('maximize').toggle)
 ```
 
-##  Integrations
+## 🤝 Integrations
 
 Integration exists for the following plugins:
 
