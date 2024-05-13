@@ -45,6 +45,13 @@ default_keymaps = true -- Enable default keymaps.
 vim.keymap.set('n', '<Leader>z', require('maximize').toggle)
 ```
 
+##  Integrations
+
+Integration exists for the following plugins:
+
+* aerial.nvim
+* nvim-tree.lua
+
 ## 📅 User Events
 
 The following user events are triggered for easier plugin integration:
