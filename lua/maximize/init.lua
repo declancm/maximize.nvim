@@ -14,9 +14,7 @@ M.setup = function(user_config)
   local config = require('maximize.config')
 
   -- Setting the config options.
-  if user_config then
-    utils.merge(config, user_config)
-  end
+  config = vim.tbl_deep_extend('force', {}, config, user_config or {})
 
   -- Set keymaps.
   if config.default_keymaps then
