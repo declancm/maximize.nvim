@@ -40,10 +40,10 @@ M.maximize = function()
     return
   end
 
+  vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
+
   -- Clear the plugin windows.
   integrations.clear()
-
-  vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
 
   -- Save options.
   vim.t.saved_cmdheight = vim.opt_local.cmdheight:get()
