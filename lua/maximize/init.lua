@@ -33,83 +33,78 @@ end
 M.maximize = function()
   vim.t.maximized = true
 
-  -- Return if only one window exists.
-  if vim.fn.winnr('$') == 1 then
-    return
-  end
+  if vim.fn.winnr('$') > 1 then
+    vim.t._maximize_saved_lazyredraw = vim.o.lazyredraw
+    vim.o.lazyredraw = true
 
-  vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
+    -- Clear the plugin windows.
+    vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
+    integrations.clear()
 
-  -- Clear the plugin windows.
-  integrations.clear()
-
-  -- Save options.
-  vim.t.saved_cmdheight = vim.opt_local.cmdheight:get()
-  vim.t.saved_cmdwinheight = vim.opt_local.cmdwinheight:get()
-
-  -- https://github.com/Shatur/neovim-session-manager/blob/9652b392805dfd497877342e54c5a71be7907daf/lua/session_manager/utils.lua#L74-L79
-  -- Remove all non-file and utility buffers because they cannot be saved
-  for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(buffer) and not utils.is_restorable(buffer) then
-      vim.api.nvim_buf_delete(buffer, { force = true })
+    -- Remove all non-file and utility buffers because they cannot be saved.
+    for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.api.nvim_buf_is_valid(buffer) and not utils.is_restorable(buffer) then
+        vim.api.nvim_buf_delete(buffer, { force = true })
+      end
     end
+
+    -- Save the existing session options and then set them.
+    local saved_sessionoptions = vim.opt_local.sessionoptions:get()
+    vim.opt_local.sessionoptions = {
+      'blank',
+      'buffers',
+      'help',
+      'resize',
+      'terminal',
+      'winsize',
+    }
+
+    -- Write the session to a temporary file and save it.
+    local tmp_file_name = os.tmpname()
+    vim.cmd('mksession! ' .. tmp_file_name)
+    local tmp_file = assert(io.open(tmp_file_name, 'rb'))
+    vim.t._maximize_saved_session = tmp_file:read('*all')
+    tmp_file:close()
+    os.remove(tmp_file_name)
+
+    -- Restore the saved session options.
+    vim.opt_local.sessionoptions = saved_sessionoptions
+
+    -- Maximize the window.
+    vim.cmd.only()
+
+    vim.o.lazyredraw = vim.t._maximize_saved_lazyredraw
   end
-
-  -- Save the existing session options and then set them.
-  -- NOTE: Options aren't saved since we aren't closing Neovim.
-  local saved_sessionoptions = vim.opt_local.sessionoptions:get()
-  vim.opt_local.sessionoptions = {
-    'blank',
-    'buffers',
-    'help',
-    'resize',
-    'terminal',
-    'winsize',
-  }
-
-  -- Write the session to a temporary file.
-  local tmp_file_name = os.tmpname()
-  vim.cmd('mksession! ' .. tmp_file_name)
-
-  -- Read the session to a tabpage-scoped variable and delete the temporary file.
-  local tmp_file = assert(io.open(tmp_file_name, 'rb'))
-  vim.t.saved_session = tmp_file:read('*all')
-  tmp_file:close()
-  os.remove(tmp_file_name)
-
-  -- Restore the saved session options.
-  vim.opt_local.sessionoptions = saved_sessionoptions
-
-  -- Maximize the window.
-  vim.cmd('only')
 end
 
 M.restore = function()
   vim.t.maximized = false
 
-  -- Restore windows.
-  if vim.t.saved_session then
-    vim.cmd('silent wall')
-    local file_name = vim.fn.expand('%:p')
-    local saved_position = vim.fn.getcurpos()
+  if vim.t._maximize_saved_session then
+    vim.t._maximize_saved_lazyredraw = vim.o.lazyredraw
+    vim.o.lazyredraw = true
+
+    -- Save the current buffer and cursor position.
+    local buffer = vim.api.nvim_get_current_buf()
+    local cursor_position = vim.fn.getcurpos()
+
+    -- The current buffer when sourcing a session can't be
+    -- modified so create and open a temporary unlisted buffer.
+    vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(false, true))
 
     -- Source the saved session.
-    vim.api.nvim_exec(vim.t.saved_session, false)
-    vim.t.saved_session = nil
+    vim.api.nvim_exec2(vim.t._maximize_saved_session, {})
+    vim.t._maximize_saved_session = nil
 
-    if vim.fn.expand('%:p') ~= file_name then
-      vim.cmd('edit ' .. file_name)
-    end
-    vim.fn.setpos('.', saved_position)
-
-    -- Restore saved options.
-    vim.opt_local.cmdheight = vim.t.saved_cmdheight
-    vim.opt_local.cmdwinheight = vim.t.saved_cmdwinheight
+    -- Return to previous buffer and cursor position.
+    vim.api.nvim_win_set_buf(0, buffer)
+    vim.fn.setpos('.', cursor_position)
 
     -- Restore plugin windows.
     integrations.restore()
-
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
+
+    vim.o.lazyredraw = vim.t._maximize_saved_lazyredraw
   end
 end
 
