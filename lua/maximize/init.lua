@@ -61,13 +61,9 @@ M.maximize = function()
   vim.opt_local.sessionoptions = {
     'blank',
     'buffers',
-    'curdir',
-    'folds',
     'help',
     'resize',
-    'tabpages',
     'terminal',
-    'winpos',
     'winsize',
   }
 
