@@ -59,6 +59,9 @@ M.maximize = function()
       'winsize',
     }
 
+    -- Prevent session managers from trying to autosave our temporary session
+    vim.t._maximize_old_session = vim.v.this_session
+
     -- Write the session to a temporary file and save it.
     local tmp_file_name = os.tmpname()
     vim.cmd('mksession! ' .. tmp_file_name)
@@ -95,6 +98,10 @@ M.restore = function()
     -- Source the saved session.
     vim.api.nvim_exec2(vim.t._maximize_saved_session, {})
     vim.t._maximize_saved_session = nil
+
+    -- Prevent session managers from trying to autosave our temporary session
+    vim.v.this_session = vim.t._maximize_old_session
+    vim.t._maximize_old_session = nil
 
     -- Return to previous buffer and cursor position.
     vim.api.nvim_win_set_buf(0, buffer)
