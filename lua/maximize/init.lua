@@ -33,7 +33,7 @@ end
 M.maximize = function()
   vim.t.maximized = true
 
-  if vim.fn.winnr('$') > 1 then
+  if #vim.api.nvim_list_wins() > 1 then
     vim.t._maximize_saved_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
 
@@ -64,7 +64,7 @@ M.maximize = function()
 
     -- Write the session to a temporary file and save it.
     local tmp_file_name = os.tmpname()
-    vim.cmd('mksession! ' .. tmp_file_name)
+    vim.cmd.mksession({ tmp_file_name, bang = true })
     local tmp_file = assert(io.open(tmp_file_name, 'rb'))
     vim.t._maximize_saved_session = tmp_file:read('*all')
     tmp_file:close()
@@ -89,7 +89,7 @@ M.restore = function()
 
     -- Save the current buffer and cursor position.
     local buffer = vim.api.nvim_get_current_buf()
-    local cursor_position = vim.fn.getcurpos()
+    local cursor = vim.api.nvim_win_get_cursor(0)
 
     -- The current buffer when sourcing a session can't be
     -- modified so create and open a temporary unlisted buffer.
@@ -105,7 +105,7 @@ M.restore = function()
 
     -- Return to previous buffer and cursor position.
     vim.api.nvim_win_set_buf(0, buffer)
-    vim.fn.setpos('.', cursor_position)
+    vim.api.nvim_win_set_cursor(0, cursor)
 
     -- Restore plugin windows.
     integrations.restore()
