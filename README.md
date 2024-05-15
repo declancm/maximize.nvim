@@ -30,10 +30,17 @@ use {
 
 A settings table can be passed into the setup function for custom options.
 
-### Default Settings
+### Default Options
 
 ```lua
-default_keymaps = true -- Enable default keymaps.
+{
+  default_keymaps = true,
+  plugins = {
+    aerial = { enable = true }, -- enable aerial.nvim integration
+    dapui = { enable = true },  -- enable nvim-dap-ui integration
+    tree = { enable = true },   -- enable nvim-tree.lua integration
+  }
+}
 ```
 
 ## ⌨️  Keymaps

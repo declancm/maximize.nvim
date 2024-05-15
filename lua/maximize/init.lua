@@ -1,5 +1,6 @@
 local M = {}
 
+local config = require('maximize.config')
 local integrations = require('maximize.integrations')
 local utils = require('maximize.utils')
 
@@ -11,14 +12,19 @@ M.setup = function(user_config)
     return
   end
 
-  local config = require('maximize.config')
-
-  -- Setting the config options.
-  config = vim.tbl_deep_extend('force', {}, config, user_config or {})
+  config.setup(user_config)
 
   -- Set keymaps.
-  if config.default_keymaps then
+  if config.options.default_keymaps then
     vim.keymap.set('n', '<Leader>z', require('maximize').toggle)
+  end
+
+  -- Enable plugin integrations.
+  integrations.plugins = {}
+  for name, options in pairs(config.options.plugins) do
+    if options.enable then
+      table.insert(integrations.plugins, require('maximize.integrations.' .. name))
+    end
   end
 end
 

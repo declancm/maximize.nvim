@@ -1,17 +1,13 @@
-local M = {
-  callbacks = {}
-}
-local plugins = {
-  require('maximize.integrations.aerial'),
-  require('maximize.integrations.dapui'),
-  require('maximize.integrations.tree'),
-}
+local M = {}
+
+M.callbacks = {}
+M.plugins = {}
 
 function M.clear()
   local tab = vim.api.nvim_get_current_tabpage()
   M.callbacks[tab] = {}
 
-  for _, fn in ipairs(plugins) do
+  for _, fn in ipairs(M.plugins) do
     local ok, cb = fn()
     if ok then
       table.insert(M.callbacks[tab], cb)
