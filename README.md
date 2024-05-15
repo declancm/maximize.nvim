@@ -1,6 +1,6 @@
 # maximize.nvim
 
-Maximize neovim windows.
+Maximize Neovim windows.
 
 ## ✨ Features
 
