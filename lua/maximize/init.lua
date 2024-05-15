@@ -33,9 +33,9 @@ M.toggle = function()
 end
 
 M.maximize = function()
-  vim.t.maximized = true
-
   if #vim.api.nvim_list_wins() > 1 then
+    vim.t.maximized = true
+
     vim.t._maximize_saved_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
 
