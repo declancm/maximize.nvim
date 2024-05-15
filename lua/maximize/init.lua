@@ -7,17 +7,13 @@ local utils = require('maximize.utils')
 M.setup = function(user_config)
   -- Check if the user has Neovim v0.8.0.
   if vim.fn.has('nvim-0.8.0') == 0 then
-    require('maximize.utils').error_msg(
-    'Neovim >= 0.8.0 is required for maximize. Use an older version tag for older Neovim versions.')
+    vim.notify('[maximize] Neovim >= 0.8.0 is required. Please use an older version tag for older Neovim versions', vim.log.levels.WARN)
     return
   end
 
   config.setup(user_config)
 
-  -- Set keymaps.
-  if config.options.default_keymaps then
-    vim.keymap.set('n', '<Leader>z', require('maximize').toggle)
-  end
+  vim.api.nvim_create_user_command('Maximize', M.toggle, { desc = 'Toggle maximizing the current window' })
 
   -- Enable plugin integrations.
   integrations.plugins = {}

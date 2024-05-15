@@ -1,13 +1,7 @@
-local utils = {}
-
-utils.error_msg = function(message, code, level)
-  code = code or 'Error'
-  level = level or 'ERROR'
-  vim.notify(string.format('%s: %s', code, message), vim.log.levels[level])
-end
+local M = {}
 
 -- https://github.com/Shatur/neovim-session-manager/blob/9652b392805dfd497877342e54c5a71be7907daf/lua/session_manager/utils.lua#L129-L149
-utils.is_restorable = function(buffer)
+M.is_restorable = function(buffer)
   if #vim.api.nvim_buf_get_option(buffer, 'bufhidden') ~= 0 then
     return false
   end
@@ -26,4 +20,4 @@ utils.is_restorable = function(buffer)
   return true
 end
 
-return utils
+return M
