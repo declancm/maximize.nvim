@@ -19,7 +19,7 @@ function M.setup(options)
   -- Check for deprecated options.
   for option, message in pairs(deprecated) do
     local keys = vim.split(option, '.', { plain = true })
-    if vim.tbl_get(options, unpack(keys)) ~= nil then
+    if vim.tbl_get(options or {}, unpack(keys)) ~= nil then
       vim.notify('[maximize.config] ' .. message, vim.log.levels.WARN)
     end
   end
