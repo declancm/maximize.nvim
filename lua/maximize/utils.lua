@@ -12,8 +12,8 @@ M.is_restorable = function(buffer)
     if not vim.api.nvim_buf_get_option(buffer, 'buflisted') then
       return false
     end
-  elseif buftype ~= 'terminal' then
-    -- Buffers other then normal or terminal are impossible to restore
+  elseif buftype ~= 'terminal' and buftype ~= 'help' then
+    -- Buffers other then normal, terminal and help are impossible to restore
     return false
   end
 
