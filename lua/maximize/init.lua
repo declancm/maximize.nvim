@@ -7,15 +7,7 @@ local utils = require('maximize.utils')
 local tabscoped = {}
 
 M.setup = function(user_config)
-  -- Check if the user has Neovim v0.8.0.
-  if vim.fn.has('nvim-0.8.0') == 0 then
-    vim.notify('[maximize] Neovim >= 0.8.0 is required. Please use an older version tag for older Neovim versions', vim.log.levels.WARN)
-    return
-  end
-
   config.setup(user_config)
-
-  vim.api.nvim_create_user_command('Maximize', M.toggle, { desc = 'Toggle maximizing the current window' })
 
   -- Enable plugin integrations.
   integrations.plugins = {}
