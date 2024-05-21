@@ -49,10 +49,7 @@ M.maximize = function()
     -- Save the existing session options and then set them.
     local saved_sessionoptions = vim.opt_local.sessionoptions:get()
     vim.opt_local.sessionoptions = {
-      'blank',
-      'buffers',
       'help',
-      'resize',
       'terminal',
       'winsize',
     }
@@ -72,7 +69,7 @@ M.maximize = function()
     vim.opt_local.sessionoptions = saved_sessionoptions
 
     -- Maximize the window.
-    vim.cmd.only()
+    vim.cmd.only({ bang = true })
 
     vim.o.lazyredraw = tabscoped[tab].lazyredraw
   end
