@@ -9,7 +9,6 @@ local tabscoped = {}
 M.setup = function(user_config)
   config.setup(user_config)
 
-  -- Enable plugin integrations.
   integrations.plugins = {}
   for name, options in pairs(config.options.plugins) do
     if options.enable then
@@ -32,10 +31,9 @@ M.maximize = function()
 
     local tab = vim.api.nvim_get_current_tabpage()
     tabscoped[tab] = {}
-    tabscoped[tab].lazyredraw = vim.o.lazyredraw
+    tabscoped[tab].save_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
 
-    -- Clear the plugin windows.
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
     integrations.clear()
 
@@ -46,16 +44,11 @@ M.maximize = function()
       end
     end
 
-    -- Save the existing session options and then set them.
-    local saved_sessionoptions = vim.opt_local.sessionoptions:get()
-    vim.opt_local.sessionoptions = {
-      'help',
-      'terminal',
-      'winsize',
-    }
-
     -- Prevent session managers from trying to autosave our temporary session
-    tabscoped[tab].session = vim.v.this_session
+    tabscoped[tab].save_session = vim.v.this_session
+
+    local save_sessionoptions = vim.o.sessionoptions
+    vim.o.sessionoptions = 'help,terminal,winsize'
 
     -- Write the session to a temporary file and save it.
     local tmp_file_name = os.tmpname()
@@ -65,13 +58,12 @@ M.maximize = function()
     tmp_file:close()
     os.remove(tmp_file_name)
 
-    -- Restore the saved session options.
-    vim.opt_local.sessionoptions = saved_sessionoptions
+    vim.o.sessionoptions = save_sessionoptions
 
     -- Maximize the window.
     vim.cmd.only({ bang = true })
 
-    vim.o.lazyredraw = tabscoped[tab].lazyredraw
+    vim.o.lazyredraw = tabscoped[tab].save_lazyredraw
   end
 end
 
@@ -80,32 +72,30 @@ M.restore = function()
 
   local tab = vim.api.nvim_get_current_tabpage()
   if tabscoped[tab].restore_script then
-    tabscoped[tab].lazyredraw = vim.o.lazyredraw
+    tabscoped[tab].save_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
 
-    -- Save the current buffer and cursor position.
-    local buffer = vim.api.nvim_get_current_buf()
-    local cursor = vim.api.nvim_win_get_cursor(0)
+    local save_buffer = vim.api.nvim_get_current_buf()
+    local save_cursor = vim.api.nvim_win_get_cursor(0)
 
     -- The current buffer when sourcing a session can't be
     -- modified so create and open a temporary unlisted buffer.
+    local save_bufhidden = vim.bo.bufhidden
+    vim.bo.bufhidden = 'hide'
     vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(false, true))
-
-    -- Source the saved session.
-    vim.api.nvim_exec2(tabscoped[tab].restore_script, {})
+    _ = vim.api.nvim_exec2(tabscoped[tab].restore_script, {})
+    vim.bo.bufhidden = save_bufhidden
 
     -- Prevent session managers from trying to autosave our temporary session
-    vim.v.this_session = tabscoped[tab].session
+    vim.v.this_session = tabscoped[tab].save_session
 
-    -- Return to previous buffer and cursor position.
-    vim.api.nvim_win_set_buf(0, buffer)
-    vim.api.nvim_win_set_cursor(0, cursor)
+    vim.api.nvim_win_set_buf(0, save_buffer)
+    vim.api.nvim_win_set_cursor(0, save_cursor)
 
-    -- Restore plugin windows.
     integrations.restore()
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
 
-    vim.o.lazyredraw = tabscoped[tab].lazyredraw
+    vim.o.lazyredraw = tabscoped[tab].save_lazyredraw
     tabscoped[tab] = {}
   end
 end
