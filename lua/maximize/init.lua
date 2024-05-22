@@ -83,7 +83,7 @@ M.restore = function()
     local save_bufhidden = vim.bo.bufhidden
     vim.bo.bufhidden = 'hide'
     vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(false, true))
-    _ = vim.api.nvim_exec2(tabscoped[tab].restore_script, {})
+    _ = vim.api.nvim_exec2(tabscoped[tab].restore_script, { output = true })
     vim.bo.bufhidden = save_bufhidden
 
     -- Prevent session managers from trying to autosave our temporary session
