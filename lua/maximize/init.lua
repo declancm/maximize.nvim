@@ -78,16 +78,21 @@ M.restore = function()
     local save_buffer = vim.api.nvim_get_current_buf()
     local save_cursor = vim.api.nvim_win_get_cursor(0)
 
-    -- The current buffer when sourcing a session can't be
-    -- modified so create and open a temporary unlisted buffer.
     local save_bufhidden = vim.bo.bufhidden
     vim.bo.bufhidden = 'hide'
+    local save_eventignore = vim.o.eventignore
+    vim.opt.eventignore:append('SessionLoadPost')
+
+    -- The current buffer when sourcing a session can't be
+    -- modified so create and open a temporary unlisted buffer.
     vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(false, true))
     _ = vim.api.nvim_exec2(tabscoped[tab].restore_script, { output = true })
-    vim.bo.bufhidden = save_bufhidden
 
     -- Prevent session managers from trying to autosave our temporary session
     vim.v.this_session = tabscoped[tab].save_session
+
+    vim.bo.bufhidden = save_bufhidden
+    vim.o.eventignore = save_eventignore
 
     vim.api.nvim_win_set_buf(0, save_buffer)
     vim.api.nvim_win_set_cursor(0, save_cursor)
