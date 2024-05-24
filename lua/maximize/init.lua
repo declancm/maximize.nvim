@@ -90,12 +90,11 @@ M.restore = function()
 
     -- Prevent session managers from trying to autosave our temporary session
     vim.v.this_session = tabscoped[tab].save_session
-
-    vim.bo.bufhidden = save_bufhidden
     vim.o.eventignore = save_eventignore
 
     vim.api.nvim_win_set_buf(0, save_buffer)
     vim.api.nvim_win_set_cursor(0, save_cursor)
+    vim.bo.bufhidden = save_bufhidden
 
     integrations.restore()
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
