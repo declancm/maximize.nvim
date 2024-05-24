@@ -31,7 +31,8 @@ M.maximize = function()
 
     local tab = vim.api.nvim_get_current_tabpage()
     tabscoped[tab] = {}
-    tabscoped[tab].save_lazyredraw = vim.o.lazyredraw
+
+    local save_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
 
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
@@ -63,7 +64,7 @@ M.maximize = function()
     -- Maximize the window.
     vim.cmd.only({ bang = true })
 
-    vim.o.lazyredraw = tabscoped[tab].save_lazyredraw
+    vim.o.lazyredraw = save_lazyredraw
   end
 end
 
@@ -72,14 +73,14 @@ M.restore = function()
 
   local tab = vim.api.nvim_get_current_tabpage()
   if tabscoped[tab].restore_script then
-    tabscoped[tab].save_lazyredraw = vim.o.lazyredraw
+    local save_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
 
     local save_buffer = vim.api.nvim_get_current_buf()
     local save_cursor = vim.api.nvim_win_get_cursor(0)
-
     local save_bufhidden = vim.bo.bufhidden
     vim.bo.bufhidden = 'hide'
+
     local save_eventignore = vim.o.eventignore
     vim.opt.eventignore:append('SessionLoadPost')
 
@@ -99,7 +100,8 @@ M.restore = function()
     integrations.restore()
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
 
-    vim.o.lazyredraw = tabscoped[tab].save_lazyredraw
+    vim.o.lazyredraw = save_lazyredraw
+
     tabscoped[tab] = {}
   end
 end
