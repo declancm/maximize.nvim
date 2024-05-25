@@ -1,4 +1,4 @@
-*maximize.nvim.txt*        For Neovim >= 0.8.0        Last change: 2024 May 24
+*maximize.nvim.txt*        For Neovim >= 0.8.0        Last change: 2024 May 25
 
 ==============================================================================
 Table of Contents                            *maximize.nvim-table-of-contents*
