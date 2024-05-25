@@ -72,7 +72,7 @@ M.restore = function()
   vim.t.maximized = false
 
   local tab = vim.api.nvim_get_current_tabpage()
-  if tabscoped[tab].restore_script then
+  if tabscoped[tab] and tabscoped[tab].restore_script then
     local save_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
 
