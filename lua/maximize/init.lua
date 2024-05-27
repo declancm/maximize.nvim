@@ -49,7 +49,7 @@ M.maximize = function()
     tabscoped[tab].save_session = vim.v.this_session
 
     local save_sessionoptions = vim.o.sessionoptions
-    vim.o.sessionoptions = 'help,terminal,winsize'
+    vim.o.sessionoptions = 'blank,help,terminal,winsize'
 
     -- Write the session to a temporary file and save it.
     local tmp_file_name = os.tmpname()
