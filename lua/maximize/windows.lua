@@ -16,10 +16,6 @@ M.get_normal_window_count = function()
   return count
 end
 
-M.clear_tabscoped_variables = function()
-  tabscoped[vim.api.nvim_get_current_tabpage()] = {}
-end
-
 M.track_last_opened_normal_window = function()
   if not is_floating_window(0) then
     local tab = vim.api.nvim_get_current_tabpage()
