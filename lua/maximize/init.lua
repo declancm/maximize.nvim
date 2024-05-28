@@ -39,6 +39,27 @@ M.toggle = function()
   end
 end
 
+local leave_floating_window = function()
+  local tab = vim.api.nvim_get_current_tabpage()
+  if vim.api.nvim_win_get_config(0).relative ~= '' then
+    if tabscoped[tab] and tabscoped[tab].prev_norm_win then
+      vim.api.nvim_set_current_win(tabscoped[tab].prev_norm_win)
+    else
+      while vim.api.nvim_win_get_config(0).relative ~= '' do
+        vim.cmd.wincmd('w')
+      end
+    end
+  end
+end
+
+local close_floating_windows = function()
+  for _, window_handle in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_config(window_handle).relative ~= '' then
+      vim.api.nvim_win_close(window_handle, true)
+    end
+  end
+end
+
 M.maximize = function()
   local normal_window_count = 0
   for _, window_handle in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
@@ -59,27 +80,11 @@ M.maximize = function()
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
     integrations.clear()
 
-    -- Move to the previous normal window if in a floating window.
-    if vim.api.nvim_win_get_config(0).relative ~= '' then
-      local prev_norm_win = tabscoped[tab].prev_norm_win
-      if prev_norm_win then
-        vim.api.nvim_set_current_win(prev_norm_win)
-      else
-        while vim.api.nvim_win_get_config(0).relative ~= '' do
-          vim.cmd.wincmd('w')
-        end
-      end
-    end
+    leave_floating_window()
+    close_floating_windows()
 
-    -- Close all floating windows.
-    for _, window_handle in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-      if vim.api.nvim_win_get_config(window_handle).relative ~= '' then
-        vim.api.nvim_win_close(window_handle, true)
-      end
-    end
-
-    -- Save the buffer handles and cursor positions for all windows.
-    -- Open a temporary scratch buffer in each window.
+    -- Save the buffer handles, cursor positions and window local variables
+    -- for all windows. Open a temporary scratch buffer in each window.
     tabscoped[tab].windows = {}
     local current_window_handle = vim.api.nvim_get_current_win()
     local windows = vim.api.nvim_tabpage_list_wins(0)
@@ -141,6 +146,9 @@ M.restore = function()
   if tabscoped[tab] and tabscoped[tab].restore_script then
     local save_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
+
+    leave_floating_window()
+    close_floating_windows()
 
     local save_buffer = vim.api.nvim_get_current_buf()
     local save_cursor = vim.api.nvim_win_get_cursor(0)
