@@ -26,7 +26,14 @@ M.toggle = function()
 end
 
 M.maximize = function()
-  if #vim.api.nvim_tabpage_list_wins(0) > 1 then
+  local normal_window_count = 0
+  for _, window_handle in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_config(window_handle).relative == '' then
+      normal_window_count = normal_window_count + 1
+    end
+  end
+
+  if normal_window_count > 1 then
     vim.t.maximized = true
 
     local tab = vim.api.nvim_get_current_tabpage()
