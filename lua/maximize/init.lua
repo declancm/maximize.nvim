@@ -87,6 +87,7 @@ M.maximize = function()
       local window = {}
       window.handle = windows[i]
       window.save_cursor = vim.api.nvim_win_get_cursor(window.handle)
+      window.save_quickfix_title = vim.w[window.handle].quickfix_title
       window.buffer = {}
       window.buffer.handle = vim.api.nvim_win_get_buf(window.handle)
       window.buffer.save_bufhidden = vim.bo[window.buffer.handle].bufhidden
@@ -172,7 +173,7 @@ M.restore = function()
         vim.api.nvim_win_set_buf(window_handle, window.buffer.handle)
         vim.api.nvim_win_set_cursor(window_handle, window.save_cursor)
         vim.bo[window.buffer.handle].bufhidden = window.buffer.save_bufhidden
-        vim.bo[window.buffer.handle].buftype = window.buffer.save_buftype
+        vim.w[window_handle].quickfix_title = window.save_quickfix_title
       end
     end
 
