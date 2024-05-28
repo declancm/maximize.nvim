@@ -146,6 +146,7 @@ M.restore_normal_windows = function()
       vim.api.nvim_win_set_buf(window_handle, window.buffer.handle)
       vim.api.nvim_win_set_cursor(window_handle, window.save_cursor)
       vim.bo[window.buffer.handle].bufhidden = window.buffer.save_bufhidden
+      vim.bo[window.buffer.handle].buftype = window.buffer.save_buftype
       vim.w[window_handle].current_syntax = vim.w[window_handle].current_syntax or window.save_current_syntax
       vim.w[window_handle].quickfix_title = vim.w[window_handle].quickfix_title or window.save_quickfix_title
     end
