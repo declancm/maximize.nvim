@@ -2,7 +2,6 @@ local M = {}
 
 local config = require('maximize.config')
 local integrations = require('maximize.integrations')
-local utils = require('maximize.utils')
 
 local tabscoped = {}
 
@@ -15,6 +14,21 @@ M.setup = function(user_config)
       table.insert(integrations.plugins, require('maximize.integrations.' .. name))
     end
   end
+
+  local group = vim.api.nvim_create_augroup('Maximize', {})
+  vim.api.nvim_create_autocmd('WinEnter', {
+    group = group,
+    callback = function()
+      if vim.api.nvim_win_get_config(0).relative == '' then
+        local tab = vim.api.nvim_get_current_tabpage()
+        if not tabscoped[tab] then
+          tabscoped[tab] = {}
+        end
+        tabscoped[tab].prev_norm_win = vim.api.nvim_get_current_win()
+      end
+    end,
+    desc = 'Keep track of the last non-floating window'
+  })
 end
 
 M.toggle = function()
@@ -45,11 +59,49 @@ M.maximize = function()
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
     integrations.clear()
 
-    -- Remove all non-file and utility buffers because they cannot be saved.
-    for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
-      if vim.api.nvim_buf_is_valid(buffer) and not utils.is_restorable(buffer) then
-        vim.api.nvim_buf_delete(buffer, { force = true })
+    -- Move to the previous normal window if in a floating window.
+    if vim.api.nvim_win_get_config(0).relative ~= '' then
+      local prev_norm_win = tabscoped[tab].prev_norm_win
+      if prev_norm_win then
+        vim.api.nvim_set_current_win(prev_norm_win)
+      else
+        while vim.api.nvim_win_get_config(0).relative ~= '' do
+          vim.cmd.wincmd('w')
+        end
       end
+    end
+
+    -- Close all floating windows.
+    for _, window_handle in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      if vim.api.nvim_win_get_config(window_handle).relative ~= '' then
+        vim.api.nvim_win_close(window_handle, true)
+      end
+    end
+
+    -- Save the buffer handles and cursor positions for all windows.
+    -- Open a temporary scratch buffer in each window.
+    tabscoped[tab].windows = {}
+    local current_window_handle = vim.api.nvim_get_current_win()
+    local windows = vim.api.nvim_tabpage_list_wins(0)
+    for i = 1, #windows do
+      local window = {}
+      window.handle = windows[i]
+      window.save_cursor = vim.api.nvim_win_get_cursor(window.handle)
+      window.buffer = {}
+      window.buffer.handle = vim.api.nvim_win_get_buf(window.handle)
+      window.buffer.save_bufhidden = vim.bo[window.buffer.handle].bufhidden
+      window.buffer.save_buftype = vim.bo[window.buffer.handle].buftype
+      if window.handle ~= current_window_handle then
+        vim.bo[window.buffer.handle].bufhidden = 'hide'
+        -- Buffer types without associated files aren't restored properly so
+        -- set them to 'nowrite'. Normal buffers can't be closed when modified
+        -- which causes issues when quiting Neovim when maximized.
+        if vim.tbl_contains({ 'quickfix', 'nofile', 'prompt' }, vim.bo[window.buffer.handle].buftype) then
+          vim.bo[window.buffer.handle].buftype = 'nowrite'
+        end
+        vim.api.nvim_win_set_buf(window.handle, vim.api.nvim_create_buf(false, true))
+      end
+      table.insert(tabscoped[tab].windows, window)
     end
 
     -- Prevent session managers from trying to autosave our temporary session
@@ -69,7 +121,11 @@ M.maximize = function()
     vim.o.sessionoptions = save_sessionoptions
 
     -- Maximize the window.
-    vim.cmd.only({ bang = true })
+    for _, window in ipairs(tabscoped[tab].windows) do
+      if window.handle ~= current_window_handle then
+        vim.api.nvim_win_close(window.handle, true)
+      end
+    end
 
     vim.o.lazyredraw = save_lazyredraw
   else
@@ -105,6 +161,20 @@ M.restore = function()
     vim.api.nvim_win_set_buf(0, save_buffer)
     vim.api.nvim_win_set_cursor(0, save_cursor)
     vim.bo.bufhidden = save_bufhidden
+
+    -- Restore the buffer handles and cursor positions for all windows.
+    local current_window_handle = vim.api.nvim_get_current_win()
+    local windows = vim.api.nvim_tabpage_list_wins(0)
+    for i = 1, #windows do
+      local window = tabscoped[tab].windows[i]
+      local window_handle = windows[i]
+      if window_handle ~= current_window_handle then
+        vim.api.nvim_win_set_buf(window_handle, window.buffer.handle)
+        vim.api.nvim_win_set_cursor(window_handle, window.save_cursor)
+        vim.bo[window.buffer.handle].bufhidden = window.buffer.save_bufhidden
+        vim.bo[window.buffer.handle].buftype = window.buffer.save_buftype
+      end
+    end
 
     integrations.restore()
     vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
