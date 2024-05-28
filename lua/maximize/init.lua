@@ -16,7 +16,7 @@ M.setup = function(user_config)
   end
 
   local group = vim.api.nvim_create_augroup('Maximize', {})
-  vim.api.nvim_create_autocmd('WinEnter', {
+  vim.api.nvim_create_autocmd('WinLeave', {
     group = group,
     callback = function()
       if vim.api.nvim_win_get_config(0).relative == '' then
