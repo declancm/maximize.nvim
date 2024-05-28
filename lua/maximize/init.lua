@@ -92,6 +92,7 @@ M.maximize = function()
       local window = {}
       window.handle = windows[i]
       window.save_cursor = vim.api.nvim_win_get_cursor(window.handle)
+      window.save_current_syntax = vim.w[window.handle].current_syntax
       window.save_quickfix_title = vim.w[window.handle].quickfix_title
       window.buffer = {}
       window.buffer.handle = vim.api.nvim_win_get_buf(window.handle)
@@ -171,7 +172,8 @@ M.restore = function()
     vim.api.nvim_win_set_cursor(0, save_cursor)
     vim.bo.bufhidden = save_bufhidden
 
-    -- Restore the buffer handles and cursor positions for all windows.
+    -- Restore the buffer handles, cursor positions and
+    -- window local variables for all restored windows.
     local current_window_handle = vim.api.nvim_get_current_win()
     local windows = vim.api.nvim_tabpage_list_wins(0)
     for i = 1, #windows do
@@ -181,7 +183,8 @@ M.restore = function()
         vim.api.nvim_win_set_buf(window_handle, window.buffer.handle)
         vim.api.nvim_win_set_cursor(window_handle, window.save_cursor)
         vim.bo[window.buffer.handle].bufhidden = window.buffer.save_bufhidden
-        vim.w[window_handle].quickfix_title = window.save_quickfix_title
+        vim.w[window_handle].current_syntax = vim.w[window_handle].current_syntax or window.save_current_syntax
+        vim.w[window_handle].quickfix_title = vim.w[window_handle].quickfix_title or window.save_quickfix_title
       end
     end
 
