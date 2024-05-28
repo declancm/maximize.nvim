@@ -30,23 +30,25 @@ M.toggle = function()
   end
 end
 
+local lazyredraw = function(fn)
+  local save_lazyredraw = vim.o.lazyredraw
+  vim.o.lazyredraw = true
+  fn()
+  vim.o.lazyredraw = save_lazyredraw
+end
+
 M.maximize = function()
   if windows.get_normal_window_count() > 1 then
     vim.t.maximized = true
 
-    local save_lazyredraw = vim.o.lazyredraw
-    vim.o.lazyredraw = true
+    lazyredraw(function()
+      vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
+      integrations.clear()
 
-    vim.api.nvim_exec_autocmds('User', { pattern = 'WindowMaximizeStart' })
-    integrations.clear()
-
-    windows.leave_floating_window()
-    windows.close_floating_windows()
-    windows.maximize_normal_window()
-
-    vim.o.lazyredraw = save_lazyredraw
-  else
-    vim.notify('Already one window', vim.log.levels.WARN)
+      windows.leave_floating_window()
+      windows.close_floating_windows()
+      windows.maximize_normal_window()
+    end)
   end
 end
 
@@ -54,17 +56,14 @@ M.restore = function()
   vim.t.maximized = false
 
   if windows.normal_windows_restorable() then
-    local save_lazyredraw = vim.o.lazyredraw
-    vim.o.lazyredraw = true
+    lazyredraw(function()
+      windows.leave_floating_window()
+      windows.close_floating_windows()
+      windows.restore_normal_windows()
 
-    windows.leave_floating_window()
-    windows.close_floating_windows()
-    windows.restore_normal_windows()
-
-    integrations.restore()
-    vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
-
-    vim.o.lazyredraw = save_lazyredraw
+      integrations.restore()
+      vim.api.nvim_exec_autocmds('User', { pattern = 'WindowRestoreEnd' })
+    end)
   end
 end
 
