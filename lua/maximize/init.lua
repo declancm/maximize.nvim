@@ -52,11 +52,9 @@ M.maximize = function()
       end
     end
 
-    -- Prevent session managers from trying to autosave our temporary session
-    tabscoped[tab].save_session = vim.v.this_session
-
     local save_sessionoptions = vim.o.sessionoptions
     vim.o.sessionoptions = 'blank,help,terminal,winsize'
+    local save_this_session = vim.v.this_session
 
     -- Write the session to a temporary file and save it.
     local tmp_file_name = os.tmpname()
@@ -66,6 +64,7 @@ M.maximize = function()
     tmp_file:close()
     os.remove(tmp_file_name)
 
+    vim.v.this_session = save_this_session
     vim.o.sessionoptions = save_sessionoptions
 
     -- Maximize the window.
@@ -92,6 +91,7 @@ M.restore = function()
 
     local save_eventignore = vim.o.eventignore
     vim.opt.eventignore:append('SessionLoadPost')
+    local save_this_session = vim.v.this_session
 
     -- The current buffer when sourcing a session can't be
     -- modified so create and open a temporary unlisted buffer.
@@ -99,7 +99,7 @@ M.restore = function()
     _ = vim.api.nvim_exec2(tabscoped[tab].restore_script, { output = true })
 
     -- Prevent session managers from trying to autosave our temporary session
-    vim.v.this_session = tabscoped[tab].save_session
+    vim.v.this_session = save_this_session
     vim.o.eventignore = save_eventignore
 
     vim.api.nvim_win_set_buf(0, save_buffer)
