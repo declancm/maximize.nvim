@@ -68,9 +68,7 @@ M.maximize_normal_window = function()
     window.buffer.save_buftype = vim.bo[window.buffer.handle].buftype
     if window.handle ~= current_window_handle then
       vim.bo[window.buffer.handle].bufhidden = 'hide'
-      -- Buffer types without associated files aren't restored properly so
-      -- set them to 'nowrite'. Normal buffers can't be closed when modified
-      -- which causes issues when quiting Neovim when maximized.
+      -- Buffer types without associated files aren't restored properly.
       if vim.tbl_contains({ 'quickfix', 'nofile', 'prompt' }, vim.bo[window.buffer.handle].buftype) then
         vim.bo[window.buffer.handle].buftype = 'nowrite'
       end
@@ -79,21 +77,27 @@ M.maximize_normal_window = function()
     table.insert(tabscoped[tab].windows, window)
   end
 
-  -- Prevent session managers from trying to autosave our temporary session
-  tabscoped[tab].save_session = vim.v.this_session
-
-  local save_sessionoptions = vim.o.sessionoptions
-  vim.o.sessionoptions = 'blank,help,terminal,winsize'
+  local save_view = vim.fn.winsaveview()
+  local save_buffer = vim.api.nvim_get_current_buf()
+  local save_bufhidden = vim.bo.bufhidden
+  vim.bo.bufhidden = 'hide'
+  vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(false, true))
 
   -- Write the session to a temporary file and save it.
   local tmp_file_name = os.tmpname()
+  local save_this_session = vim.v.this_session
+  local save_sessionoptions = vim.o.sessionoptions
+  vim.o.sessionoptions = 'blank,help,terminal,winsize'
   vim.cmd.mksession({ tmp_file_name, bang = true })
+  vim.o.sessionoptions = save_sessionoptions
+  vim.v.this_session = save_this_session
   local tmp_file = assert(io.open(tmp_file_name, 'rb'))
   tabscoped[tab].restore_script = tmp_file:read('*all')
   tmp_file:close()
   os.remove(tmp_file_name)
 
-  vim.o.sessionoptions = save_sessionoptions
+  vim.api.nvim_win_set_buf(0, save_buffer)
+  vim.bo.bufhidden = save_bufhidden
 
   -- Maximize the window.
   for _, window in ipairs(tabscoped[tab].windows) do
@@ -101,6 +105,8 @@ M.maximize_normal_window = function()
       vim.api.nvim_win_close(window.handle, true)
     end
   end
+
+  vim.fn.winrestview(save_view)
 end
 
 M.normal_windows_restorable = function()
@@ -114,25 +120,23 @@ M.restore_normal_windows = function()
   local tab = vim.api.nvim_get_current_tabpage()
   tabscoped[tab] = tabscoped[tab] or {}
 
+  local save_view = vim.fn.winsaveview()
   local save_buffer = vim.api.nvim_get_current_buf()
-  local save_cursor = vim.api.nvim_win_get_cursor(0)
   local save_bufhidden = vim.bo.bufhidden
   vim.bo.bufhidden = 'hide'
-
-  local save_eventignore = vim.o.eventignore
-  vim.opt.eventignore:append('SessionLoadPost')
 
   -- The current buffer when sourcing a session can't be
   -- modified so create and open a temporary unlisted buffer.
   vim.api.nvim_win_set_buf(0, vim.api.nvim_create_buf(false, true))
-  _ = vim.api.nvim_exec2(tabscoped[tab].restore_script, { output = true })
 
-  -- Prevent session managers from trying to autosave our temporary session
-  vim.v.this_session = tabscoped[tab].save_session
+  local save_eventignore = vim.o.eventignore
+  vim.opt.eventignore:append('SessionLoadPost')
+  local save_this_session = vim.v.this_session
+  _ = vim.api.nvim_exec2(tabscoped[tab].restore_script, { output = true })
+  vim.v.this_session = save_this_session
   vim.o.eventignore = save_eventignore
 
   vim.api.nvim_win_set_buf(0, save_buffer)
-  vim.api.nvim_win_set_cursor(0, save_cursor)
   vim.bo.bufhidden = save_bufhidden
 
   -- Restore the buffer handles, cursor positions and
@@ -152,7 +156,9 @@ M.restore_normal_windows = function()
     end
   end
 
-  tabscoped[tab] = {}
+  vim.fn.winrestview(save_view)
+
+  tabscoped[tab] = nil
 end
 
 return M
