@@ -49,6 +49,8 @@ M.maximize = function()
       windows.close_floating_windows()
       windows.maximize_normal_window()
     end)
+  else
+    vim.notify('Already one window', vim.log.levels.WARN)
   end
 end
 
