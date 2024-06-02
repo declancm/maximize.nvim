@@ -72,6 +72,8 @@ M.maximize = function()
     vim.cmd.only({ bang = true })
 
     vim.o.lazyredraw = save_lazyredraw
+  else
+    vim.notify('Already one window', vim.log.levels.WARN)
   end
 end
 
