@@ -69,7 +69,7 @@ M.maximize_normal_window = function()
     if window.handle ~= current_window_handle then
       vim.bo[window.buffer.handle].bufhidden = 'hide'
       -- Buffer types without associated files aren't restored properly.
-      if vim.tbl_contains({ 'quickfix', 'nofile', 'prompt' }, vim.bo[window.buffer.handle].buftype) then
+      if vim.list_contains({ 'quickfix', 'nofile', 'prompt' }, vim.bo[window.buffer.handle].buftype) then
         vim.bo[window.buffer.handle].buftype = 'nowrite'
       end
       vim.api.nvim_win_set_buf(window.handle, vim.api.nvim_create_buf(false, true))
