@@ -30,7 +30,7 @@ use {
 ### Lazy
 
 ```lua
-use {
+return {
   'declancm/maximize.nvim',
   config = true
 }
