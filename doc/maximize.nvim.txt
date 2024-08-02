@@ -1,4 +1,4 @@
-*maximize.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 June 02
+*maximize.nvim.txt*       For Neovim >= 0.8.0      Last change: 2024 August 02
 
 ==============================================================================
 Table of Contents                            *maximize.nvim-table-of-contents*
@@ -50,7 +50,7 @@ PACKER ~
 LAZY ~
 
 >lua
-    use {
+    return {
       'declancm/maximize.nvim',
       config = true
     }
