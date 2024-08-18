@@ -1,5 +1,7 @@
 return function()
   local ok, api = pcall(require, 'nvim-tree.api')
+  -- `is_visible` is only available since nvim-tree commit 'a774fa1'
+  ok = ok and api.tree.is_visible ~= nil
   if not ok then
     return false, nil
   end
